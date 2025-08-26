@@ -5,23 +5,56 @@ const regd_users = express.Router();
 
 let users = [];
 
-const isValid = (username) => { //returns boolean
-    return users.some(user => user.username === username);
+// Check if username already exists
+const isValid = (username) => {
+    let existingUsers = users.filter(user => user.username === username);
+    return existingUsers.length > 0;
 }
 
-const authenticatedUser = (username, password) => { //returns boolean
-    return users.some(user => user.username === username && user.password === password);
+// Check if username & password match
+const authenticatedUser = (username, password) => {
+    let validusers = users.filter(user => user.username === username && user.password === password);
+    return validusers.length > 0;
 }
 
-//only registered users can login
-regd_users.post("/login", (req, res) => {
-    //Write your code here
-    return res.status(300).json({ message: "Yet to be implemented" });
+// Register new user
+regd_users.post("/register", (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+
+    if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+    }
+
+    if (isValid(username)) {
+        return res.status(409).json({ message: "User already exists!" });
+    }
+
+    users.push({ username, password });
+    return res.status(200).json({ message: "User successfully registered. Now you can login" });
 });
 
-// Add a book review
+// Login user
+regd_users.post("/login", (req, res) => {
+    const username = req.body.username;
+    const password = req.body.password;
+
+    if (!username || !password) {
+        return res.status(404).json({ message: "Error logging in" });
+    }
+
+    if (authenticatedUser(username, password)) {
+        let accessToken = jwt.sign({ data: password }, 'access', { expiresIn: 60 * 60 });
+
+        req.session.authorization = { accessToken, username };
+        return res.status(200).send("User successfully logged in");
+    } else {
+        return res.status(208).json({ message: "Invalid Login. Check username and password" });
+    }
+});
+
+// Add book review (to be completed later)
 regd_users.put("/auth/review/:isbn", (req, res) => {
-    //Write your code here
     return res.status(300).json({ message: "Yet to be implemented" });
 });
 
