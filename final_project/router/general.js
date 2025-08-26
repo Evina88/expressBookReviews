@@ -54,6 +54,7 @@ public_users.get('/isbn/:isbn', function (req, res) {
     }
 });
 
+
 // Get book details based on author
 public_users.get('/author/:author', function (req, res) {
     const author = req.params.author;
@@ -69,6 +70,40 @@ public_users.get('/author/:author', function (req, res) {
       res.status(200).json(result);
     } else {
       res.status(404).json({message: "No books found for this author"});
+    }
+});
+// TASK 11: Get book by ISBN using async/await
+public_users.get('/isbn-async/:isbn', async (req, res) => {
+    const isbn = req.params.isbn;
+    try {
+        const book = await new Promise((resolve, reject) => {
+            const result = books[isbn];
+            if (result) resolve(result);
+            else reject(`Book with ISBN ${isbn} not found`);
+        });
+        res.status(200).json({ message: `Book with ISBN ${isbn} retrieved successfully (Async/Await)`, book });
+    } catch (err) {
+        res.status(404).json({ message: err });
+    }
+});
+
+// TASK 12: Get books by author using async/await
+public_users.get('/author-async/:author', async (req, res) => {
+    const author = req.params.author;
+
+    try {
+        const filteredBooks = await new Promise((resolve, reject) => {
+            const result = Object.values(books).filter(book => book.author === author);
+            if (result.length > 0) resolve(result);
+            else reject(`No books found for author: ${author}`);
+        });
+
+        res.status(200).json({
+            message: `Books by author ${author} retrieved successfully (Async/Await)`,
+            books: filteredBooks
+        });
+    } catch (err) {
+        res.status(404).json({ message: err });
     }
 });
 
@@ -90,6 +125,25 @@ public_users.get('/title/:title', function (req, res) {
     }
 });
 
+// TASK 13: Get book by title using async/await
+public_users.get('/title-async/:title', async (req, res) => {
+    const title = req.params.title;
+
+    try {
+        const filteredBooks = await new Promise((resolve, reject) => {
+            const result = Object.values(books).filter(book => book.title === title);
+            if (result.length > 0) resolve(result);
+            else reject(`No books found for title: ${title}`);
+        });
+
+        res.status(200).json({
+            message: `Books by title ${title} retrieved successfully (Async/Await)`,
+            books: filteredBooks
+        });
+    } catch (err) {
+        res.status(404).json({ message: err });
+    }
+});
 //  Get book review
 public_users.get('/review/:isbn', function (req, res) {
     const isbn = req.params.isbn;
