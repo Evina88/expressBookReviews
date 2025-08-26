@@ -28,6 +28,22 @@ public_users.get('/', function (req, res) {
     res.send(JSON.stringify(books, null, 4));
 });
 
+// TASK 10: Using Promise callback 
+public_users.get('/books-promise', (req, res) => {
+    new Promise((resolve, reject) => {
+        if (books) {
+            resolve(books);
+        } else {
+            reject("No books found");
+        }
+    })
+    .then(data => res.status(200).json({
+        message: "Books retrieved successfully using Promise)",
+        books: data
+    }))
+    .catch(err => res.status(500).json({ message: "Error fetching books", error: err }));
+});
+
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
     const isbn = req.params.isbn;
